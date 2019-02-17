@@ -20,6 +20,7 @@ namespace TimeTrackerApp
 
             while (programRunnung)
             {
+                Console.Clear();
                 Console.WriteLine($"Hello {programRunnung.ToString()}\n\nWhat would you like to do today?\n\n{menu}");
                 Console.Write("Selection: ");
                 inputLine = Console.ReadLine().ToLower();
@@ -52,18 +53,21 @@ namespace TimeTrackerApp
 
         static void EnterActivity()
         {
+            Console.Clear();
             Console.WriteLine("Enter Activity.");
             Utility.KeyToProceed();
         }
 
         static void ViewTrackedData()
         {
+            Console.Clear();
             Console.WriteLine("View Tracked Data");
             Utility.KeyToProceed();
         }
 
         static void RunCalculations()
         {
+            Console.Clear();
             Console.WriteLine("Run calculations.");
             Utility.KeyToProceed();
         }

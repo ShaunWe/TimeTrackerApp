@@ -1,0 +1,9 @@
+\\vmware-host\Shared Folders\Downloads\TimeTrackerApp\TimeTrackerApp\bin\Debug\TimeTrackerApp.exe.config
+\\vmware-host\Shared Folders\Downloads\TimeTrackerApp\TimeTrackerApp\bin\Debug\TimeTrackerApp.exe
+\\vmware-host\Shared Folders\Downloads\TimeTrackerApp\TimeTrackerApp\bin\Debug\TimeTrackerApp.pdb
+\\vmware-host\Shared Folders\Downloads\TimeTrackerApp\TimeTrackerApp\bin\Debug\MySql.Data.dll
+\\vmware-host\Shared Folders\Downloads\TimeTrackerApp\TimeTrackerApp\obj\Debug\TimeTrackerApp.csprojAssemblyReference.cache
+\\vmware-host\Shared Folders\Downloads\TimeTrackerApp\TimeTrackerApp\obj\Debug\TimeTrackerApp.csproj.CoreCompileInputs.cache
+\\vmware-host\Shared Folders\Downloads\TimeTrackerApp\TimeTrackerApp\obj\Debug\TimeTrackerApp.csproj.CopyComplete
+\\vmware-host\Shared Folders\Downloads\TimeTrackerApp\TimeTrackerApp\obj\Debug\TimeTrackerApp.exe
+\\vmware-host\Shared Folders\Downloads\TimeTrackerApp\TimeTrackerApp\obj\Debug\TimeTrackerApp.pdb

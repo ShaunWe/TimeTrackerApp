@@ -656,6 +656,7 @@ namespace TimeTrackerApp
                         Dictionary<int, string> dates = PullCalendarData();
                         bool selectionMade = false;
 
+                        Console.Clear();
                         while (!selectionMade)
                         {
                             Console.WriteLine("Which date would you like to view?:");
@@ -690,10 +691,78 @@ namespace TimeTrackerApp
                     case "2":
                     case "select by category":
                     case "category":
+                        Dictionary<int, string> categories = PullData("activity_category_id", "category_description", "activity_categories");
+                        selectionMade = false;
+
+                        Console.Clear();
+                        while (!selectionMade)
+                        {
+                            Console.WriteLine("Which category would you like to view?:");
+                            foreach (KeyValuePair<int, string> kvp in categories)
+                            {
+                                Console.WriteLine($"{kvp.Key}. {kvp.Value}");
+                            }
+                            Console.WriteLine($"{categories.Count + 1}. Back");
+                            Console.Write("Selection: ");
+                            inputLine = Console.ReadLine().ToLower();
+
+                            if (inputLine == $"{categories.Count + 1}" || inputLine == "back")
+                            {
+                                selectionMade = true;
+                                break;
+                            }
+                            foreach (KeyValuePair<int, string> kvp in categories)
+                            {
+                                if (inputLine == $"{kvp.Key}" || inputLine == $"{kvp.Value.ToLower()}")
+                                {
+                                    ViewData("activity_log.category_description", kvp.Key, kvp.Value);
+                                    selectionMade = true;
+                                }
+                            }
+                            if (!selectionMade)
+                            {
+                                Console.WriteLine("Input not recognized");
+                                Utility.KeyToProceed();
+                            }
+                        }
                         break;
                     case "3":
                     case "select by description":
                     case "description":
+                        Dictionary<int, string> descriptions = PullData("activity_descriptions_id", "activity_description", "activity_descriptions");
+                        selectionMade = false;
+
+                        Console.Clear();
+                        while (!selectionMade)
+                        {
+                            Console.WriteLine("Which description would you like to view?:");
+                            foreach (KeyValuePair<int, string> kvp in descriptions)
+                            {
+                                Console.WriteLine($"{kvp.Key}. {kvp.Value}");
+                            }
+                            Console.WriteLine($"{descriptions.Count + 1}. Back");
+                            Console.Write("Selection: ");
+                            inputLine = Console.ReadLine().ToLower();
+
+                            if (inputLine == $"{descriptions.Count + 1}" || inputLine == "back")
+                            {
+                                selectionMade = true;
+                                break;
+                            }
+                            foreach (KeyValuePair<int, string> kvp in descriptions)
+                            {
+                                if (inputLine == $"{kvp.Key}" || inputLine == $"{kvp.Value.ToLower()}")
+                                {
+                                    ViewData("activity_log.activity_description", kvp.Key, kvp.Value);
+                                    selectionMade = true;
+                                }
+                            }
+                            if (!selectionMade)
+                            {
+                                Console.WriteLine("Input not recognized");
+                                Utility.KeyToProceed();
+                            }
+                        }
                         break;
                     case "4":
                     case "back":
@@ -760,6 +829,7 @@ namespace TimeTrackerApp
         {
             using (MySqlConnection conn = new MySqlConnection(cs))
             {
+                conn.Open();
                 string stm = $"SELECT activity_categories.category_description AS Category, activity_descriptions.activity_description AS Description, activity_times.time_spent_on_activity AS TimeSpent " +
                     $"FROM activity_log " +
                     $"LEFT JOIN activity_categories ON activity_log.category_description = activity_categories.activity_category_id " +
@@ -817,7 +887,10 @@ namespace TimeTrackerApp
                         {
                             case "y":
                             case "yes":
-                                //enter activity with date selected
+                                while (EnterActivity(dateID))
+                                {
+                                    //Runs until user decides to not enter another activity
+                                }
                                 answerProvided = true;
                                 break;
                             case "n":
@@ -834,11 +907,78 @@ namespace TimeTrackerApp
             }
         }
 
+        static void ViewData (string whereField, int whereID, string selectedValue)
+        {
+            using (MySqlConnection conn = new MySqlConnection(cs))
+            {
+                conn.Open();
+                string stm = $"SELECT activity_categories.category_description AS Category, activity_descriptions.activity_description AS Description, tracked_calendar_dates.calendar_date AS ActivityDate, activity_times.time_spent_on_activity AS TimeSpent " +
+                    $"FROM activity_log " +
+                    $"LEFT JOIN activity_categories ON activity_log.category_description = activity_categories.activity_category_id " +
+                    $"LEFT JOIN activity_descriptions ON activity_log.activity_description = activity_descriptions.activity_descriptions_id " +
+                    $"LEFT JOIN tracked_calendar_dates ON activity_log.calendar_date = tracked_calendar_dates.calendar_date_id " +
+                    $"LEFT JOIN activity_times ON activity_log.time_spent_on_activity = activity_times.activity_time_id " +
+                    $"WHERE {whereField} = {whereID}";
+                string inTransfer = "";
+                double transDouble;
+                List<string> categories = new List<string>();
+                List<string> descriptions = new List<string>();
+                List<double> timeSpent = new List<double>();
+                List<string> dates = new List<string>();
+                MySqlCommand cmd = new MySqlCommand(stm, conn);
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                while (rdr.Read())
+                {
+                    categories.Add(rdr["Category"] as string);
+                    descriptions.Add(rdr["Description"] as string);
+                    var inTrans = rdr["TimeSpent"];
+                    if (inTrans == null)
+                    {
+                        inTransfer = "unable to read data";
+                    }
+                    else
+                    {
+                        inTransfer = inTrans.ToString();
+                    }
+                    while (!double.TryParse(inTransfer, out transDouble))
+                    {
+                        Console.Write($"Value not recognized as a number.\nWhat is the number value of {inTransfer}: ");
+                        inTransfer = Console.ReadLine();
+                    }
+                    timeSpent.Add(transDouble);
+                    inTrans = rdr["ActivityDate"];
+                    if (inTrans.GetType() == typeof(DateTime))
+                    {
+                        DateTime temp = (DateTime)inTrans;
+
+                        inTransfer = temp.ToString("yyyy-MM-dd");
+                    }
+                    else
+                    {
+                        inTransfer = inTrans.ToString();
+                    }
+                    dates.Add(inTransfer);
+                }
+
+                Console.Clear();
+                for (int i = 0; i < categories.Count; i++)
+                {
+                    Console.WriteLine($"Category: {categories[i]}\t\tDate: {dates[i]}\n" +
+                        $"Description: {descriptions[i]}\t\tTime Spent: {timeSpent[i]}\n");
+                }
+                transDouble = timeSpent.Sum();
+                Console.WriteLine($"Total Time spent on {selectedValue}: {transDouble}");
+                Utility.KeyToProceed();
+            }
+        }
+
         static Dictionary<int,string> PullData(string dataID, string dataField, string table)
         {
             Dictionary<int, string> thisData = new Dictionary<int, string>();
             using (MySqlConnection conn = new MySqlConnection(cs))
             {
+                conn.Open();
                 string stm = $"SELECT {dataID}, {dataField} FROM {table}";
                 string inTransfer;
                 int idValue;
@@ -876,6 +1016,7 @@ namespace TimeTrackerApp
             Dictionary<int, string> thisData = new Dictionary<int, string>();
             using (MySqlConnection conn = new MySqlConnection(cs))
             {
+                conn.Open();
                 string stm = "SELECT calendar_date_id, calendar_date FROM tracked_calendar_dates";
                 MySqlCommand cmd = new MySqlCommand(stm, conn);
                 MySqlDataReader rdr = cmd.ExecuteReader();

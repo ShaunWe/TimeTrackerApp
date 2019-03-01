@@ -779,7 +779,16 @@ namespace TimeTrackerApp
         static void RunCalculations()
         {
             Console.Clear();
-            Console.WriteLine("Run calculations.");
+            Console.WriteLine($"1. The amount of time spent on moving tasks this month was {TimeSpent("WHERE category_description = 8")} hours.\n" +
+                $"2. The percentage of time spent sleeping this month was {(TimeSpent("WHERE category_description = 4")/TotalHoursInDatabase()).ToString("P")}\n" +
+                $"3. The amount of time spent eating this month was {TimeSpent("WHERE category_description = 7")} hours.\n" +
+                $"4. The percentage of time spent this month working on projects was {(TimeSpent("WHERE activity_description = 9")/TotalHoursInDatabase()).ToString("P")}\n" +
+                $"5. The amount of time spent on travel and driving was {TimeSpent("WHERE activity_description = 4")+ TimeSpent("WHERE activity_description = 11")} hours.\n" +
+                $"6. The percentage of time spent on school not including sleeping and work was {((TimeSpent("WHERE category_description = 2")+ TimeSpent("WHERE category_description = 3"))/((TotalHoursInDatabase()-TimeSpent("WHERE category_description = 4"))- TimeSpent("WHERE category_description = 1"))).ToString("P")}\n" +
+                $"7. The amount of time spent on the well being of the wife and kids was {TimeSpent("WHERE category_description = 9")+ TimeSpent("WHERE category_description = 10")} hours.\n" +
+                $"8. The percentage of time spent on movies, watching TV, or playing games was {((TimeSpent("WHERE activity_description = 1")+ TimeSpent("WHERE activity_description = 2")+ TimeSpent("WHERE activity_description = 3"))/TotalHoursInDatabase()).ToString("P")}\n" +
+                $"9. The amount of time spent on relaxation this month was {TimeSpent("WHERE category_description = 6")} hours.\n" +
+                $"10. The percentage of time spent eating breakfast in relation to all eating activities is {(TimeSpent("WHERE activity_description = 5")/TimeSpent("WHERE category_description = 7")).ToString("P")}");
             Utility.KeyToProceed();
         }
 
@@ -1009,6 +1018,83 @@ namespace TimeTrackerApp
             }
 
             return thisData;
+        }
+
+        static double TotalHoursInDatabase()
+        {
+            double totalHours = 0;
+            using (MySqlConnection conn = new MySqlConnection(cs))
+            {
+                conn.Open();
+                string stm = "SELECT activity_times.time_spent_on_activity AS TimeSpent " +
+                    "FROM activity_log " +
+                    "LEFT JOIN activity_times ON activity_log.time_spent_on_activity = activity_times.activity_time_id";
+                string inTransfer;
+                List<double> times = new List<double>();
+                double transDouble;
+                MySqlCommand cmd = new MySqlCommand(stm, conn);
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                while (rdr.Read())
+                {
+                    var inTrans = rdr["TimeSpent"];
+                    if (inTrans == null)
+                    {
+                        inTransfer = "unable to read data";
+                    }
+                    else
+                    {
+                        inTransfer = inTrans.ToString();
+                    }
+                    while (!double.TryParse(inTransfer, out transDouble))
+                    {
+                        Console.Write($"Value not recognized as a number.\nWhat is the number value of {inTransfer}: ");
+                        inTransfer = Console.ReadLine();
+                    }
+                    times.Add(transDouble);
+                }
+                totalHours = times.Sum();
+            }
+            return totalHours;
+        }
+
+        static double TimeSpent(string whereClause)
+        {
+            double totalHours = 0;
+            using (MySqlConnection conn = new MySqlConnection(cs))
+            {
+                conn.Open();
+                string stm = $"SELECT activity_times.time_spent_on_activity AS TimeSpent " +
+                    $"FROM activity_log " +
+                    $"LEFT JOIN activity_times ON activity_log.time_spent_on_activity = activity_times.activity_time_id " +
+                    $"{whereClause}";
+                string inTransfer;
+                List<double> times = new List<double>();
+                double transDouble;
+                MySqlCommand cmd = new MySqlCommand(stm, conn);
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                while (rdr.Read())
+                {
+                    var inTrans = rdr["TimeSpent"];
+                    if (inTrans == null)
+                    {
+                        inTransfer = "unable to read data";
+                    }
+                    else
+                    {
+                        inTransfer = inTrans.ToString();
+                    }
+                    while (!double.TryParse(inTransfer, out transDouble))
+                    {
+                        Console.Write($"Value not recognized as a number.\nWhat is the number value of {inTransfer}: ");
+                        inTransfer = Console.ReadLine();
+                    }
+                    times.Add(transDouble);
+                }
+                totalHours = times.Sum();
+            }
+            return totalHours;
         }
 
         static Dictionary<int,string> PullCalendarData()

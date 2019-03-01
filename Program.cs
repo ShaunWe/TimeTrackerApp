@@ -105,6 +105,7 @@ namespace TimeTrackerApp
             MySqlConnection conn3 = null;
             MySqlConnection conn4 = null;
             MySqlConnection conn5 = null;
+            MySqlConnection conn6 = null;
             bool boolReturn = false;
             try
             {
@@ -259,6 +260,7 @@ namespace TimeTrackerApp
                 stm = "SELECT activity_time_id, time_spent_on_activity FROM activity_times";
                 MySqlCommand cmd5 = new MySqlCommand(stm, conn5);
                 MySqlDataReader rdr5 = cmd5.ExecuteReader();
+                double transDouble;
 
                 while (rdr5.Read())
                 {
@@ -279,33 +281,47 @@ namespace TimeTrackerApp
                             inTransfer = Console.ReadLine();
                         }
                     } while (times.ContainsKey(idValue));
-                    times.Add(idValue, rdr5["time_spent_on_activity"] as string);
+                    inTrans = rdr5["time_spent_on_activity"];
+                    if (inTrans == null)
+                    {
+                        inTransfer = "unable to read data";
+                    }
+                    else
+                    {
+                        inTransfer = inTrans.ToString();
+                    }
+                    while (!double.TryParse(inTransfer, out transDouble))
+                    {
+                        Console.Write($"Value not recognized as a number.\nWhat is the number value of {inTransfer}: ");
+                        inTransfer = Console.ReadLine();
+                    }
+                    times.Add(idValue, transDouble.ToString());
                 }
                 timeChoice = MakeChoice(times, "How much time did you spend on the activity: ");
 
 
-                using (MySqlConnection conn6 = new MySqlConnection(cs))
-                {
-                    stm = "INSERT INTO activity_log (user_id, calendar_day, calendar_date, day_name, category_description, activity_descriptions, time_spent_on_activity) " +
-                        "VALUES (1, @calendarDay, @calendarDate, @dayName, @categoryDescription, @activityDescription, @timeSpentOnActivity)";
+                conn6 = new MySqlConnection(cs);
+                stm = "INSERT INTO activity_log (user_id, calendar_day, calendar_date, day_name, category_description, activity_description, time_spent_on_activity) " +
+                    "VALUES (1, @calendarDay, @calendarDate, @dayName, @categoryDescription, @activityDescription, @timeSpentOnActivity)";
+                conn6.Open();
 
-                    MySqlCommand cmd6 = new MySqlCommand(stm, conn6);
-                    cmd6.Parameters.AddWithValue("@calendarDay", dayChoice);
-                    cmd6.Parameters.AddWithValue("@calendarDate", dayChoice);
-                    cmd6.Parameters.AddWithValue("@dayName", dayOfWeekChoice);
-                    cmd6.Parameters.AddWithValue("@categoryDescription", categoryChoice);
-                    cmd6.Parameters.AddWithValue("@activityDescription", descriptionChoice);
-                    cmd6.Parameters.AddWithValue("@timeSpentOnActivity", timeChoice);
+                MySqlCommand cmd6 = new MySqlCommand(stm, conn6);
+                cmd6.Parameters.AddWithValue("@calendarDay", dayChoice);
+                cmd6.Parameters.AddWithValue("@calendarDate", dayChoice);
+                cmd6.Parameters.AddWithValue("@dayName", dayOfWeekChoice);
+                cmd6.Parameters.AddWithValue("@categoryDescription", categoryChoice);
+                cmd6.Parameters.AddWithValue("@activityDescription", descriptionChoice);
+                cmd6.Parameters.AddWithValue("@timeSpentOnActivity", timeChoice);
 
-                    MySqlDataReader rdr6 = cmd.ExecuteReader();
-                }
+                MySqlDataReader rdr6 = cmd6.ExecuteReader();
+                
 
                 Console.WriteLine($"Activity entered:\n" +
                         $"Activity Category: {categories[categoryChoice]}\n" +
                         $"Activity Description: {descriptions[descriptionChoice]}\n" +
                         $"Date of Activity: {dates[dayChoice]}\n" +
                         $"Day of Activity: {dayChoice}\n" +
-                        $"Day of Week: {days[dayOfWeekChoice]}" +
+                        $"Day of Week: {days[dayOfWeekChoice]}\n" +
                         $"Time Spent: {times[timeChoice]}");
                 Utility.KeyToProceed();
 
@@ -361,6 +377,10 @@ namespace TimeTrackerApp
                 {
                     conn5.Close();
                 }
+                if (conn6 != null)
+                {
+                    conn6.Close();
+                }
             }
             return boolReturn;
         }
@@ -372,6 +392,7 @@ namespace TimeTrackerApp
             MySqlConnection conn3 = null;
             MySqlConnection conn4 = null;
             MySqlConnection conn5 = null;
+            MySqlConnection conn6 = null;
             bool boolReturn = false;
             try
             {
@@ -526,6 +547,7 @@ namespace TimeTrackerApp
                 stm = "SELECT activity_time_id, time_spent_on_activity FROM activity_times";
                 MySqlCommand cmd5 = new MySqlCommand(stm, conn5);
                 MySqlDataReader rdr5 = cmd5.ExecuteReader();
+                double transDouble;
 
                 while (rdr5.Read())
                 {
@@ -546,33 +568,46 @@ namespace TimeTrackerApp
                             inTransfer = Console.ReadLine();
                         }
                     } while (times.ContainsKey(idValue));
-                    times.Add(idValue, rdr5["time_spent_on_activity"] as string);
+                    inTrans = rdr5["time_spent_on_activity"];
+                    if (inTrans == null)
+                    {
+                        inTransfer = "unable to read data";
+                    }
+                    else
+                    {
+                        inTransfer = inTrans.ToString();
+                    }
+                    while (!double.TryParse(inTransfer, out transDouble))
+                    {
+                        Console.Write($"Value not recognized as a number.\nWhat is the number value of {inTransfer}: ");
+                        inTransfer = Console.ReadLine();
+                    }
+                    times.Add(idValue, transDouble.ToString());
                 }
                 timeChoice = MakeChoice(times, "How much time did you spend on the activity: ");
 
+                conn6 = new MySqlConnection(cs);
+                stm = "INSERT INTO activity_log (user_id, calendar_day, calendar_date, day_name, category_description, activity_description, time_spent_on_activity) " +
+                    "VALUES (1, @calendarDay, @calendarDate, @dayName, @categoryDescription, @activityDescription, @timeSpentOnActivity)";
+                conn6.Open();
 
-                using (MySqlConnection conn6 = new MySqlConnection(cs))
-                {
-                    stm = "INSERT INTO activity_log (user_id, calendar_day, calendar_date, day_name, category_description, activity_descriptions, time_spent_on_activity) " +
-                        "VALUES (1, @calendarDay, @calendarDate, @dayName, @categoryDescription, @activityDescription, @timeSpentOnActivity)";
-
-                    MySqlCommand cmd6 = new MySqlCommand(stm, conn6);
-                    cmd6.Parameters.AddWithValue("@calendarDay", dayChoice);
-                    cmd6.Parameters.AddWithValue("@calendarDate", dayChoice);
-                    cmd6.Parameters.AddWithValue("@dayName", dayOfWeekChoice);
-                    cmd6.Parameters.AddWithValue("@categoryDescription", categoryChoice);
-                    cmd6.Parameters.AddWithValue("@activityDescription", descriptionChoice);
-                    cmd6.Parameters.AddWithValue("@timeSpentOnActivity", timeChoice);
-
-                    MySqlDataReader rdr6 = cmd.ExecuteReader();
-                }
+                MySqlCommand cmd6 = new MySqlCommand(stm, conn6);
+                
+                cmd6.Parameters.AddWithValue("@calendarDay", dayChoice);
+                cmd6.Parameters.AddWithValue("@calendarDate", dayChoice);
+                cmd6.Parameters.AddWithValue("@dayName", dayOfWeekChoice);
+                cmd6.Parameters.AddWithValue("@categoryDescription", categoryChoice);
+                cmd6.Parameters.AddWithValue("@activityDescription", descriptionChoice);
+                cmd6.Parameters.AddWithValue("@timeSpentOnActivity", timeChoice);
+                
+                MySqlDataReader rdr6 = cmd6.ExecuteReader();
 
                 Console.WriteLine($"Activity entered:\n" +
                         $"Activity Category: {categories[categoryChoice]}\n" +
                         $"Activity Description: {descriptions[descriptionChoice]}\n" +
                         $"Date of Activity: {dates[dayChoice]}\n" +
                         $"Day of Activity: {dayChoice}\n" +
-                        $"Day of Week: {days[dayOfWeekChoice]}" +
+                        $"Day of Week: {days[dayOfWeekChoice]}\n" +
                         $"Time Spent: {times[timeChoice]}");
                 Utility.KeyToProceed();
 
@@ -627,6 +662,10 @@ namespace TimeTrackerApp
                 if (conn5 != null)
                 {
                     conn5.Close();
+                }
+                if (conn6 != null)
+                {
+                    conn6.Close();
                 }
             }
             return boolReturn;
